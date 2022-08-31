@@ -1,73 +1,69 @@
+import java.io.IOException;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public class Main {
-    MyStack processStack = new MyStack(100);
-    MyQueue transferQueue = new MyQueue();
+    static Stack<String> stack = new Stack<>();
+    static Queue2<String> queue = new Queue2<>();
+    static String[] messages;
 
-    public void menu(){
-        String choice = "";
-        while (!"0".equals(choice)){
-            Scanner sc = new Scanner(System.in);
-
-            System.out.println("1. Send Messages");
-            System.out.println("2. Show All Messages");
-            System.out.println("0. Exit");
-
-            System.out.println("====Please input choice====");
-            choice = sc.nextLine();
-            switch (choice){
-                case "1":
-                    transfer();
-                    break;
-                case "2":
-                    process();
-                    break;
-                case "0":
-                    System.exit(0);
-            }
-        }
-    }
-
-    private void transfer(){
+    private static void enterMessages(){
+        System.out.print("Enter messages: ");
         Scanner sc = new Scanner(System.in);
-        System.out.println("Transfering ....");
-        String messages;
-
-        do {
-            messages = sc.nextLine();
-            if (!messages.equals("finish")){
-                transferQueue.enQueue(messages);
-            }
-        }while (!messages.equals("finish"));
-
-        while (!transferQueue.isEmpty()){
-            try {
-                String x = transferQueue.deQueue();
-                processStack.push(x);
-                System.out.println("messages: " + x + " ");
-            }catch (Exception exception){
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, exception);
-            }
-        }
+        String input = sc.nextLine();
+        messages = input.split(",");
     }
 
-    private void process(){
-        System.out.println("Processing");
-        while (!processStack.isEmpty()){
-            try {
-                System.out.println("Messages " + processStack.pop());
-            }catch (Exception exception){
-
+    private static void transfer(){
+        //long startTime1 = System.currentTimeMillis();
+        try {
+            for(int i = 0; i < messages.length; i++){
+                if(messages[i].equals(" ")){
+                    throw new IOException();
+                }else if(messages[i].length() > 250){
+                    throw new ArrayIndexOutOfBoundsException("The message characters must be " +
+                            "less than 250 character!!! Please retype");
+                } else {
+                    queue.offer(messages[i]);
+                    System.out.println("Transferring " + messages[i] + " ...");
+                }
             }
+        } catch (IndexOutOfBoundsException arrayIndexOutOfBoundsException){
+            System.out.println(arrayIndexOutOfBoundsException.getMessage());
+        } catch (IOException exception){
+            System.out.println("You haven't typed anything yet!!! Please retype");
         }
+        //long endTime1 = System.currentTimeMillis();
+        //System.out.println("Time " + (endTime1 - startTime1) + "ms");
     }
 
-    public static void main(String[] args) {
-//        multiplyEvens(1);
-        Main main = new Main();
-        main.menu();
+    private static void process(){
+        //long startTime2 = System.currentTimeMillis();
+        while (!queue.isEmpty()){
+            stack.push(queue.poll());
+            System.out.println("Message has been sent successfully!!!");
+        }
+        //long endTime2 = System.currentTimeMillis();
+        //System.out.println("Time " + (endTime2 - startTime2) + "ms");
+    }
+
+    private static void result(){
+        //long startTime3 = System.currentTimeMillis();
+        while (!stack.isEmpty()){
+            System.out.println("Message receive: " + stack.pop());
+        }
+        //long endTime3 = System.currentTimeMillis();
+        //System.out.println("Time " + (endTime3 - startTime3) + "ms");
+    }
+
+    public static void main(String[] args){
+        enterMessages();
+        long startTime = System.currentTimeMillis();
+        transfer();
+        process();
+        result();
+        long endTime = System.currentTimeMillis();
+        System.out.println("The system took " + (endTime - startTime) + "ms to run...");
     }
 
     public static int multiplyEvens(int x){
